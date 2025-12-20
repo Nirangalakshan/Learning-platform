@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Search, Sparkles, ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search, Sparkles, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -20,7 +20,13 @@ export function HeroSection() {
               strokeWidth="0.5"
             />
             <defs>
-              <linearGradient id="mapGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <linearGradient
+                id="mapGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
                 <stop offset="0%" stopColor="#00FF99" />
                 <stop offset="100%" stopColor="#FFD166" />
               </linearGradient>
@@ -38,24 +44,27 @@ export function HeroSection() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 text-sm">
           <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-muted-foreground">Powered by AI for A/L Students</span>
+          <span className="text-muted-foreground">
+            Powered by AI for A/L Students
+          </span>
         </div>
 
         {/* Headline */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 text-balance">
           <span className="text-foreground">Learn Smarter with </span>
-          <span className="text-primary text-glow-green">AI</span>
+          <span className="text-primary text-green">AI</span>
         </h1>
 
         {/* Subheading */}
         <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 text-pretty">
-          Your complete A/L Science companion — notes, quizzes, past papers & AI mock exams.
+          Your complete A/L Science companion — notes, quizzes, past papers & AI
+          mock exams.
         </p>
 
         {/* Search Input */}
         <div className="max-w-xl mx-auto mb-8">
           <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+            <div className="absolute  rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
             <div className="relative flex items-center">
               <Search className="absolute left-4 w-5 h-5 text-muted-foreground" />
               <Input
@@ -69,26 +78,37 @@ export function HeroSection() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/signup">
-            <Button size="lg" className="glow-green px-8 py-6 text-base font-medium">
-              Start Learning
+            <Button
+              size="lg"
+              className="glow-green px-8 py-6 text-base font-medium"
+            >
+              Start Learning now
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>
           <Link href="/login">
-            <Button size="lg" variant="outline" className="px-8 py-6 text-base font-medium bg-transparent">
+            {/* <Button
+              size="lg"
+              variant="outline"
+              className="px-8 py-6 text-base font-medium "
+            >
               Login
-            </Button>
+            </Button> */}
           </Link>
         </div>
 
         {/* Stats */}
         <div className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
           <div>
-            <div className="text-2xl sm:text-3xl font-bold text-primary">15+</div>
+            <div className="text-2xl sm:text-3xl font-bold text-primary">
+              15+
+            </div>
             <div className="text-sm text-muted-foreground">Years of Papers</div>
           </div>
           <div>
-            <div className="text-2xl sm:text-3xl font-bold text-secondary">1000+</div>
+            <div className="text-2xl sm:text-3xl font-bold text-secondary">
+              1000+
+            </div>
             <div className="text-sm text-muted-foreground">Quiz Questions</div>
           </div>
           <div>
@@ -98,5 +118,5 @@ export function HeroSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

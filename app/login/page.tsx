@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen flex">
@@ -27,8 +27,12 @@ export default function LoginPage() {
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2 text-foreground">Welcome back</h1>
-            <p className="text-muted-foreground">Sign in to continue your learning journey</p>
+            <h1 className="text-3xl font-bold mb-2 text-foreground">
+              Welcome back
+            </h1>
+            <p className="text-muted-foreground">
+              Sign in to continue your learning journey
+            </p>
           </div>
 
           {/* Login Form */}
@@ -37,7 +41,9 @@ export default function LoginPage() {
               <form className="space-y-5">
                 {/* Email */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Email</label>
+                  <label className="text-sm font-medium text-foreground">
+                    Email
+                  </label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -50,7 +56,9 @@ export default function LoginPage() {
 
                 {/* Password */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">Password</label>
+                  <label className="text-sm font-medium text-foreground">
+                    Password
+                  </label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
@@ -63,23 +71,35 @@ export default function LoginPage() {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
-                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
 
                 {/* Forgot Password */}
                 <div className="text-right">
-                  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-primary hover:underline"
+                  >
                     Forgot password?
                   </Link>
                 </div>
 
                 {/* Submit Button */}
-                <Button type="submit" className="w-full py-5 glow-green text-base font-medium">
-                  Sign In
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
+                <Link href={"/dashboard"}>
+                  <Button
+                    type="submit"
+                    className="w-full py-5 glow-green text-base font-medium"
+                  >
+                    Sign In
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </Link>
 
                 {/* Divider */}
                 <div className="relative my-6">
@@ -87,12 +107,18 @@ export default function LoginPage() {
                     <div className="w-full border-t border-border/50" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    <span className="bg-card px-2 text-muted-foreground">
+                      Or continue with
+                    </span>
                   </div>
                 </div>
 
                 {/* Google Login */}
-                <Button type="button" variant="outline" className="w-full py-5 rounded-xl bg-transparent">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full py-5 rounded-xl bg-transparent"
+                >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
                       fill="currentColor"
@@ -118,7 +144,10 @@ export default function LoginPage() {
               {/* Sign Up Link */}
               <p className="text-center text-sm text-muted-foreground mt-6">
                 {"Don't have an account? "}
-                <Link href="/signup" className="text-primary hover:underline font-medium">
+                <Link
+                  href="/signup"
+                  className="text-primary hover:underline font-medium"
+                >
                   Sign up
                 </Link>
               </p>
@@ -145,11 +174,12 @@ export default function LoginPage() {
               {"Let's continue learning smarter."}
             </h2>
             <p className="text-muted-foreground">
-              Access your personalized study materials, track your progress, and ace your A/L exams.
+              Access your personalized study materials, track your progress, and
+              ace your A/L exams.
             </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

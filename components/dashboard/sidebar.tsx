@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   BookOpen,
@@ -13,25 +13,28 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { useState } from "react"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useSidebar } from "@/contexts/sidebar-context";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/subjects", label: "Subjects", icon: BookOpen },
   { href: "/dashboard/quizzes", label: "Quizzes", icon: Brain },
   { href: "/dashboard/past-papers", label: "Past Papers", icon: FileText },
-  { href: "/dashboard/ai-generator", label: "AI Paper Generator", icon: Sparkles },
+  {
+    href: "/dashboard/ai-generator",
+    label: "AI Paper Generator",
+    icon: Sparkles,
+  },
   { href: "/dashboard/progress", label: "Progress", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
-]
+];
 
 export function DashboardSidebar() {
-  const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const pathname = usePathname();
+  const { collapsed, setCollapsed, mobileOpen, setMobileOpen } = useSidebar();
 
   return (
     <>
@@ -56,7 +59,7 @@ export function DashboardSidebar() {
         className={cn(
           "fixed left-0 top-0 h-full z-40 flex flex-col glass border-r border-border/50 transition-all duration-300",
           collapsed ? "w-20" : "w-64",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Logo */}
@@ -75,14 +78,19 @@ export function DashboardSidebar() {
             onClick={() => setCollapsed(!collapsed)}
             className="hidden lg:flex p-2 rounded-lg hover:bg-muted transition-colors"
           >
-            <ChevronLeft className={cn("w-5 h-5 transition-transform", collapsed && "rotate-180")} />
+            <ChevronLeft
+              className={cn(
+                "w-5 h-5 transition-transform",
+                collapsed && "rotate-180"
+              )}
+            />
           </button>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = pathname === item.href
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
@@ -91,31 +99,35 @@ export function DashboardSidebar() {
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all",
                   isActive
                     ? "bg-primary/10 text-primary glow-green"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
                 onClick={() => setMobileOpen(false)}
               >
                 <item.icon className="w-5 h-5 flex-shrink-0" />
-                {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
+                {!collapsed && (
+                  <span className="text-sm font-medium">{item.label}</span>
+                )}
               </Link>
-            )
+            );
           })}
         </nav>
 
         {/* Footer */}
         <div className="p-3 border-t border-border/50">
-          <Button
-            variant="ghost"
-            className={cn(
-              "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
-              collapsed && "justify-center px-0",
-            )}
-          >
-            <LogOut className="w-5 h-5" />
-            {!collapsed && <span>Logout</span>}
-          </Button>
+          <Link href="/">
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
+                collapsed && "justify-center px-0"
+              )}
+            >
+              <LogOut className="w-5 h-5" />
+              {!collapsed && <span>Logout</span>}
+            </Button>
+          </Link>
         </div>
       </aside>
     </>
-  )
+  );
 }

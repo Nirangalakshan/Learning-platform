@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Menu, X, Globe } from "lucide-react"
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Menu, X, Globe } from "lucide-react";
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [language, setLanguage] = useState<"en" | "si">("en")
+  const [isOpen, setIsOpen] = useState(false);
+  const [language, setLanguage] = useState<"en" | "si">("en");
 
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "#features", label: "Features" },
     { href: "#subjects", label: "Subjects" },
     { href: "#pricing", label: "Pricing" },
-  ]
+  ];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass">
@@ -23,7 +23,9 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">AI</span>
+              <span className="text-primary-foreground font-bold text-sm">
+                AI
+              </span>
             </div>
             <span className="font-semibold text-lg text-foreground">
               Learn LK <span className="text-sm">🇱🇰</span>
@@ -60,14 +62,18 @@ export function Navbar() {
               </Button>
             </Link>
             <Link href="/signup">
-              <Button size="sm" className="glow-green">
+              <Button size="sm" className="green">
                 Get Started
               </Button>
             </Link>
           </div>
 
           {/* Mobile menu button */}
-          <button className="md:hidden p-2 text-foreground" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle menu">
+          <button
+            className="md:hidden p-2 text-foreground"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Toggle menu"
+          >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
@@ -101,5 +107,5 @@ export function Navbar() {
         </div>
       )}
     </nav>
-  )
+  );
 }

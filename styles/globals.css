@@ -1,15 +1,21 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+::-webkit-scrollbar {
+  display: none;
+}
+
+
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(76.275% 0.2434 141.635 / 0.871);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(76.275% 0.2434 141.635 / 0.871);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(76.275% 0.2434 141.635 / 0.871);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
