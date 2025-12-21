@@ -1,5 +1,15 @@
-import { Card, CardContent } from "@/components/ui/card"
-import { FileText, Brain, BookOpen, GraduationCap, Calendar, BarChart3 } from "lucide-react"
+"use client";
+
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  FileText,
+  Brain,
+  BookOpen,
+  GraduationCap,
+  Calendar,
+  BarChart3,
+} from "lucide-react";
+import { motion } from "framer-motion";
 
 const features = [
   {
@@ -38,42 +48,83 @@ const features = [
     description: "Track your progress with detailed performance insights",
     color: "text-secondary",
   },
-]
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 50, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
 
 export function FeaturesSection() {
   return (
     <section id="features" className="py-24 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-balance">
             Everything You Need to <span className="text-primary">Excel</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Comprehensive tools designed specifically for A/L Science students in Sri Lanka
+            Comprehensive tools designed specifically for A/L Science students
+            in Sri Lanka
           </p>
-        </div>
+        </motion.div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           {features.map((feature, index) => (
-            <Card
-              key={index}
-              className="glass border-border/50 rounded-2xl group hover:border-primary/50 transition-all duration-300"
-            >
-              <CardContent className="p-6">
-                <div
-                  className={`w-12 h-12 rounded-xl bg-card flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${feature.color}`}
-                >
-                  <feature.icon className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-foreground">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">{feature.description}</p>
-              </CardContent>
-            </Card>
+            <motion.div key={index} variants={itemVariants}>
+              <Card className="glass border-border/50 rounded-2xl group hover:border-primary/50 transition-all duration-300 h-full">
+                <CardContent className="p-6">
+                  <motion.div
+                    className={`w-12 h-12 rounded-xl bg-card flex items-center justify-center mb-4 ${feature.color}`}
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    <feature.icon className="w-6 h-6" />
+                  </motion.div>
+                  <h3 className="text-lg font-semibold mb-2 text-foreground">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
-  )
+  );
 }

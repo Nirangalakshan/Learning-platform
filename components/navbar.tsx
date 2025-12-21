@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/mode-toggle";
 import { Menu, X, Globe } from "lucide-react";
 
 export function Navbar() {
@@ -47,7 +48,6 @@ export function Navbar() {
 
           {/* Right side actions */}
           <div className="hidden md:flex items-center gap-4">
-            {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === "en" ? "si" : "en")}
               className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -55,6 +55,7 @@ export function Navbar() {
               <Globe className="w-4 h-4" />
               <span>{language === "en" ? "EN" : "සිං"}</span>
             </button>
+            <ModeToggle />
 
             <Link href="/login">
               <Button variant="ghost" size="sm">
@@ -62,7 +63,10 @@ export function Navbar() {
               </Button>
             </Link>
             <Link href="/signup">
-              <Button size="sm" className="green">
+              <Button
+                size="sm"
+                className="bg-[#009966] dark:bg-[#00FF99] text-white dark:text-black hover:bg-[#008055] dark:hover:bg-[#00cc7a] border-none shadow-md"
+              >
                 Get Started
               </Button>
             </Link>

@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/contexts/sidebar-context";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -98,7 +99,7 @@ export function DashboardSidebar() {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all",
                   isActive
-                    ? "bg-primary/10 text-primary glow-green"
+                    ? "bg-primary/10 text-[#009966] dark:text-[#00FF99]"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
                 onClick={() => setMobileOpen(false)}
@@ -113,7 +114,20 @@ export function DashboardSidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="p-3 border-t border-border/50">
+        <div className="p-3 border-t border-border/50 space-y-2">
+          <div
+            className={cn(
+              "flex items-center",
+              collapsed ? "justify-center" : "justify-between px-2"
+            )}
+          >
+            {!collapsed && (
+              <span className="text-sm font-medium text-muted-foreground">
+                Theme
+              </span>
+            )}
+            <ModeToggle />
+          </div>
           <Link href="/">
             <Button
               variant="ghost"
