@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -32,7 +34,63 @@ const itemVariants = {
 };
 
 export default function LoginPage() {
+  const router = useRouter();
+  const supabase = createClient();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      // Check if email is verified
+      if (data.user && !data.user.email_confirmed_at) {
+        setError("Please verify your email before logging in.");
+        setLoading(false);
+        return;
+      }
+
+      // Redirect to dashboard
+      router.push("/dashboard");
+    } catch (err) {
+      setError("An unexpected error occurred");
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+      }
+    } catch (err) {
+      setError("Failed to sign in with Google");
+    }
+  };
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
@@ -137,7 +195,19 @@ export default function LoginPage() {
           <motion.div variants={itemVariants}>
             <Card className="glass border-border/50 rounded-2xl">
               <CardContent className="p-6">
-                <form className="space-y-5">
+                <form onSubmit={handleLogin} className="space-y-5">
+                  {/* Error Message */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm"
+                    >
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{error}</span>
+                    </motion.div>
+                  )}
+
                   {/* Email */}
                   <motion.div
                     className="space-y-2"
@@ -153,6 +223,9 @@ export default function LoginPage() {
                       <Input
                         type="email"
                         placeholder="your@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
                         className="pl-10 py-5 rounded-xl bg-input border-border/50 focus:border-primary/50 transition-all"
                       />
                     </div>
@@ -173,6 +246,9 @@ export default function LoginPage() {
                       <Input
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
                         className="pl-10 pr-10 py-5 rounded-xl bg-input border-border/50 focus:border-primary/50 transition-all"
                       />
                       <motion.button
@@ -212,20 +288,19 @@ export default function LoginPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.5 }}
                   >
-                    <Link href={"/dashboard"}>
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full py-5 glow-green text-base font-medium"
                       >
-                        <Button
-                          type="submit"
-                          className="w-full py-5 glow-green text-base font-medium"
-                        >
-                          Sign In
-                          <ArrowRight className="ml-2 w-5 h-5" />
-                        </Button>
-                      </motion.div>
-                    </Link>
+                        {loading ? "Signing in..." : "Sign In"}
+                        {!loading && <ArrowRight className="ml-2 w-5 h-5" />}
+                      </Button>
+                    </motion.div>
                   </motion.div>
 
                   {/* Divider */}
@@ -257,6 +332,7 @@ export default function LoginPage() {
                     >
                       <Button
                         type="button"
+                        onClick={handleGoogleLogin}
                         variant="outline"
                         className="w-full py-5 rounded-xl bg-transparent"
                       >

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,8 +17,11 @@ import {
   ArrowRight,
   ArrowLeft,
   Check,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createClient } from "@/lib/supabase/client";
 
 const subjects = [
   { id: "biology", name: "Biology", emoji: "🧬" },
@@ -60,10 +64,28 @@ const formVariants = {
 };
 
 export default function SignupPage() {
+  const router = useRouter();
+  const supabase = createClient();
+
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  // Form States
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    district: "",
+  });
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const toggleSubject = (id: string) => {
     setSelectedSubjects((prev) =>
@@ -71,7 +93,103 @@ export default function SignupPage() {
     );
   };
 
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            subjects: selectedSubjects,
+            exam_year: selectedYear,
+            district: formData.district,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (signUpError) {
+        setError(signUpError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        setSuccess(true);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const progress = step === 1 ? 50 : 100;
+
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-background relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-background" />
+          <motion.div
+            className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-20 blur-3xl bg-primary"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.2, 0.1] }}
+            transition={{ duration: 5, repeat: Infinity }}
+          />
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full"
+        >
+          <Card className="glass border-primary/20 rounded-2xl">
+            <CardContent className="p-8 text-center space-y-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6"
+              >
+                <Check className="w-10 h-10 text-green-500" />
+              </motion.div>
+
+              <h2 className="text-2xl font-bold text-foreground">
+                Check your email
+              </h2>
+              <p className="text-muted-foreground">
+                We&apos;ve sent a verification link to{" "}
+                <span className="text-foreground font-medium">
+                  {formData.email}
+                </span>
+                . Please click the link to verify your account and get started.
+              </p>
+
+              <div className="pt-4 space-y-3">
+                <Button
+                  variant="outline"
+                  className="w-full h-12"
+                  onClick={() => router.push("/login")}
+                >
+                  Return to Login
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Didn&apos;t receive the email? Check your spam folder or try
+                  again.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex relative overflow-hidden">
@@ -282,7 +400,10 @@ export default function SignupPage() {
                         <div className="relative group">
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input
+                            name="fullName"
                             placeholder="Your name"
+                            value={formData.fullName}
+                            onChange={handleInputChange}
                             className="pl-10 py-5 rounded-xl bg-input border-border/50"
                           />
                         </div>
@@ -301,8 +422,11 @@ export default function SignupPage() {
                         <div className="relative group">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input
+                            name="email"
                             type="email"
                             placeholder="your@email.com"
+                            value={formData.email}
+                            onChange={handleInputChange}
                             className="pl-10 py-5 rounded-xl bg-input border-border/50"
                           />
                         </div>
@@ -321,8 +445,11 @@ export default function SignupPage() {
                         <div className="relative group">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                           <Input
+                            name="password"
                             type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
+                            value={formData.password}
+                            onChange={handleInputChange}
                             className="pl-10 pr-10 py-5 rounded-xl bg-input border-border/50"
                           />
                           <motion.button
@@ -353,7 +480,20 @@ export default function SignupPage() {
                         >
                           <Button
                             type="button"
-                            onClick={() => setStep(2)}
+                            onClick={() => {
+                              if (
+                                formData.fullName &&
+                                formData.email &&
+                                formData.password
+                              ) {
+                                setStep(2);
+                              }
+                            }}
+                            disabled={
+                              !formData.fullName ||
+                              !formData.email ||
+                              !formData.password
+                            }
                             className="w-full py-5 glow-green text-base font-medium"
                           >
                             Continue
@@ -398,7 +538,18 @@ export default function SignupPage() {
 
                 <Card className="glass border-border/50 rounded-2xl">
                   <CardContent className="p-6">
-                    <div className="space-y-6">
+                    <form onSubmit={handleSignup} className="space-y-6">
+                      {error && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm"
+                        >
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          <span>{error}</span>
+                        </motion.div>
+                      )}
+
                       {/* Select Subjects */}
                       <motion.div
                         className="space-y-3"
@@ -478,7 +629,10 @@ export default function SignupPage() {
                           District <Badge variant="secondary">Optional</Badge>
                         </label>
                         <Input
+                          name="district"
                           placeholder="e.g., Colombo"
+                          value={formData.district}
+                          onChange={handleInputChange}
                           className="py-5 rounded-xl bg-input border-border/50"
                         />
                       </motion.div>
@@ -511,14 +665,28 @@ export default function SignupPage() {
                         >
                           <Button
                             type="submit"
+                            disabled={
+                              loading ||
+                              selectedSubjects.length === 0 ||
+                              !selectedYear
+                            }
                             className="w-full py-5 glow-green text-base font-medium"
                           >
-                            Create Account
-                            <ArrowRight className="ml-2 w-5 h-5" />
+                            {loading ? (
+                              <>
+                                <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                                Creating Account...
+                              </>
+                            ) : (
+                              <>
+                                Create Account
+                                <ArrowRight className="ml-2 w-5 h-5" />
+                              </>
+                            )}
                           </Button>
                         </motion.div>
                       </motion.div>
-                    </div>
+                    </form>
                   </CardContent>
                 </Card>
               </motion.div>
