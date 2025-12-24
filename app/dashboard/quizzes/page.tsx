@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Brain, Clock, Trophy, Zap, ChevronRight } from "lucide-react"
+import { AIQuizGenerator } from "@/components/dashboard/ai-quiz-generator"
 
 const quizzes = [
   {
@@ -58,6 +59,11 @@ export default function QuizzesPage() {
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Quizzes</h1>
         <p className="text-muted-foreground">Test your knowledge with adaptive quizzes</p>
+      </div>
+
+      {/* AI Quiz Generator */}
+      <div className="mb-8">
+        <AIQuizGenerator />
       </div>
 
       {/* Stats */}
