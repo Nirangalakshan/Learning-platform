@@ -1,3 +1,5 @@
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatsCard } from "@/components/dashboard/stats-card";
@@ -11,6 +13,7 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
+import { AIAssistant } from "@/components/dashboard/ai-assistant";
 
 const subjects = [
   {
@@ -43,7 +46,23 @@ const subjects = [
   },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
   return (
     <div className="relative min-h-screen">
       {/* Main Container with Responsive Padding */}
@@ -55,8 +74,13 @@ export default function DashboardPage() {
           <div className="relative p-5 sm:p-6 md:p-8 lg:p-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
               <div className="flex-1">
+                <p>
+                  {profile?.exam_year}
+                  {"\n"}
+                  {profile?.district} A/L Exam
+                </p>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
-                  Welcome back, Niranga 👋
+                  Welcome back, {profile?.full_name || "Student"} 👋
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground">
                   {
@@ -124,6 +148,9 @@ export default function DashboardPage() {
                 <SubjectProgressCard key={subject.name} {...subject} />
               ))}
             </div>
+          </div>
+          <div>
+            <AIAssistant />
           </div>
 
           {/* Study Plan & AI Suggestion */}

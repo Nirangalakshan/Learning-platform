@@ -112,6 +112,15 @@ export default function SignupPage() {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
+      if (data.user) {
+        await supabase.from("profiles").insert({
+          id: data.user.id,
+          full_name: formData.fullName,
+          subjects: selectedSubjects,
+          exam_year: selectedYear,
+          district: formData.district,
+        });
+      }
 
       if (signUpError) {
         setError(signUpError.message);
