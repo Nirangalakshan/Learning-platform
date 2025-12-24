@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     const payload = {
       message,
-      model: "APILAGEAI-PRO",
+      model: "APILAGEAI-FREE",
       enableGoogleSearch: true,
     }
 
