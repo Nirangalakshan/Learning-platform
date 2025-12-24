@@ -5,9 +5,9 @@ const API_URL = process.env.APILAGE_API_URL
 
 export async function POST(request: NextRequest) {
   try {
-    const { subject, lessons, isAllSyllabus, questionType, difficulty, questionCount } = await request.json()
+    const { subject, lessons, isAllSyllabus, questionType, difficulty, questionCount, language } = await request.json()
 
-    if (!subject || !questionType || !difficulty || !questionCount) {
+    if (!subject || !questionType || !difficulty || !questionCount || !language) {
       return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
     }
 
@@ -15,7 +15,12 @@ export async function POST(request: NextRequest) {
       ? `Cover all topics and lessons from the ${subject} syllabus`
       : `Focus on these specific lessons/topics: ${lessons.join(", ")}`
 
+    const languageInstruction =
+      language === "sinhala" ? "Generate the quiz in Sinhala language." : "Generate the quiz in English language."
+
     const prompt = `Generate ${questionCount} ${difficulty.toLowerCase()} level ${questionType.replace("-", " ")} questions for ${subject} subject (Sri Lankan A/L Science).
+
+${languageInstruction}
 
 Scope: ${scopeSection}
 
@@ -72,7 +77,6 @@ Return the response as JSON with this structure:
 
     let questions = []
     try {
-      // Try to extract JSON from the response
       const responseText = aiData.message || aiData.response || JSON.stringify(aiData)
       const jsonMatch = responseText.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
@@ -81,7 +85,6 @@ Return the response as JSON with this structure:
       }
     } catch (parseError) {
       console.error("[v0] Failed to parse AI response:", parseError)
-      // Return mock data if parsing fails (for testing)
       questions = generateMockQuestions(subject, questionType, difficulty, questionCount)
     }
 
@@ -92,6 +95,7 @@ Return the response as JSON with this structure:
       difficulty,
       lessons,
       isAllSyllabus,
+      language,
     })
   } catch (error) {
     console.error("[v0] Quiz generation error:", error)

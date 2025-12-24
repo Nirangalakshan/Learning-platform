@@ -24,6 +24,12 @@ const QUESTION_TYPES = [
   { value: "true-false", label: "True/False" },
   { value: "mixed", label: "Mixed (All Types)" },
 ]
+
+const LANGUAGES = [
+  { value: "english", label: "English" },
+  { value: "sinhala", label: "Sinhala" },
+]
+
 const DIFFICULTY_LEVELS = ["Easy", "Medium", "Hard"]
 const QUESTION_COUNTS = ["5", "10", "15", "20"]
 
@@ -35,6 +41,7 @@ type GeneratedQuiz = {
   questionType: string
   difficulty: string
   questionCount: number
+  language: string
   questions: Array<{
     id: string
     text: string
@@ -52,6 +59,7 @@ export function AIQuizGenerator() {
   const [questionType, setQuestionType] = useState("")
   const [difficulty, setDifficulty] = useState("")
   const [questionCount, setQuestionCount] = useState("")
+  const [language, setLanguage] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedQuiz, setGeneratedQuiz] = useState<GeneratedQuiz | null>(null)
   const [showDialog, setShowDialog] = useState(false)
@@ -71,7 +79,7 @@ export function AIQuizGenerator() {
   }
 
   const handleGenerateQuiz = async () => {
-    if (!subject || !questionType || !difficulty || !questionCount) {
+    if (!subject || !questionType || !difficulty || !questionCount || !language) {
       alert("Please select all options")
       return
     }
@@ -93,6 +101,7 @@ export function AIQuizGenerator() {
           questionType,
           difficulty,
           questionCount: Number.parseInt(questionCount),
+          language,
         }),
       })
 
@@ -107,6 +116,7 @@ export function AIQuizGenerator() {
         questionType,
         difficulty,
         questionCount: Number.parseInt(questionCount),
+        language,
         questions: data.questions || [],
         generatedAt: new Date().toLocaleDateString(),
       }
@@ -133,6 +143,7 @@ export function AIQuizGenerator() {
     if (!generatedQuiz) return
     const quizContent = `${generatedQuiz.subject} - ${generatedQuiz.questionType} Quiz
 Difficulty: ${generatedQuiz.difficulty}
+Language: ${generatedQuiz.language.charAt(0).toUpperCase() + generatedQuiz.language.slice(1)}
 Scope: ${generatedQuiz.isAllSyllabus ? "All Syllabus" : generatedQuiz.lessons.join(", ")}
 Generated: ${generatedQuiz.generatedAt}
 ---
@@ -247,6 +258,22 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
                 </SelectContent>
               </Select>
             </div>
+
+            <div>
+              <label className="text-sm font-medium text-foreground mb-2 block">Language</label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger className="bg-background border-border/50">
+                  <SelectValue placeholder="Select language..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {subject && (
@@ -296,6 +323,7 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
               !questionType ||
               !difficulty ||
               !questionCount ||
+              !language ||
               (!isAllSyllabus && selectedLessons.length === 0)
             }
             className="w-full"
@@ -334,6 +362,7 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
                     {quiz.questionCount} {quiz.questionType} questions • {quiz.difficulty}
                   </p>
                   <p className="text-xs text-primary/80 mt-1">
+                    {quiz.language.charAt(0).toUpperCase() + quiz.language.slice(1)} •{" "}
                     {quiz.isAllSyllabus ? "All Syllabus" : quiz.lessons.join(", ")}
                   </p>
                 </div>
@@ -365,6 +394,7 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
               {generatedQuiz?.questionCount} {generatedQuiz?.questionType} questions • {generatedQuiz?.difficulty} level
               {generatedQuiz && (
                 <div className="mt-2 text-xs text-muted-foreground">
+                  {generatedQuiz.language.charAt(0).toUpperCase() + generatedQuiz.language.slice(1)} •{" "}
                   {generatedQuiz.isAllSyllabus ? "All Syllabus" : generatedQuiz.lessons.join(", ")}
                 </div>
               )}
