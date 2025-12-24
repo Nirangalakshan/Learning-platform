@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import { createClient } from "@/lib/supabase/client";
 
 const SUBJECTS_WITH_TOPICS = {
   Biology: ["Cell Biology", "Genetics", "Ecology", "Human Physiology"],
@@ -71,6 +72,8 @@ type GeneratedQuiz = {
 };
 
 export default function Quizzes() {
+  const supabase = createClient();
+
   const [subject, setSubject] = useState("");
   const [selectedLessons, setSelectedLessons] = useState<string[]>([]);
   const [isAllSyllabus, setIsAllSyllabus] = useState(false);
@@ -84,6 +87,45 @@ export default function Quizzes() {
   );
   const [showDialog, setShowDialog] = useState(false);
   const [savedQuizzes, setSavedQuizzes] = useState<GeneratedQuiz[]>([]);
+
+  useEffect(() => {
+    const fetchSavedQuizzes = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("ai_quizzes")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching quizzes:", error);
+        return;
+      }
+
+      if (data) {
+        const mappedQuizzes: GeneratedQuiz[] = data.map((quiz: any) => ({
+          id: quiz.id?.toString(),
+          subject: quiz.subject,
+          lessons: quiz.lessons,
+          isAllSyllabus: quiz.is_all_syllabus,
+          questionType: quiz.question_type,
+          difficulty: quiz.difficulty,
+          questionCount: quiz.question_count,
+          language: quiz.language,
+          questions: quiz.questions,
+          generatedAt: new Date(quiz.created_at).toLocaleDateString(),
+        }));
+        setSavedQuizzes(mappedQuizzes);
+      }
+    };
+
+    fetchSavedQuizzes();
+  }, [supabase]);
 
   const handleLessonToggle = (lesson: string) => {
     if (isAllSyllabus) return;
@@ -152,7 +194,42 @@ export default function Quizzes() {
       };
 
       setGeneratedQuiz(newQuiz);
-      setSavedQuizzes([...savedQuizzes, newQuiz]);
+      setSavedQuizzes((prev) => [...prev, newQuiz]);
+
+      // Save to Supabase
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        const { error: saveError } = await supabase.from("ai_quizzes").insert({
+          user_id: user.id, // creating relation to user
+          subject: subject,
+          lessons: isAllSyllabus ? [] : selectedLessons,
+          is_all_syllabus: isAllSyllabus,
+          question_type: questionType,
+          difficulty: difficulty,
+          question_count: Number.parseInt(questionCount),
+          language: language,
+          questions: data.questions || [],
+        });
+
+        if (saveError) {
+          console.error(
+            "Failed to save quiz to Supabase:",
+            JSON.stringify(saveError, null, 2)
+          );
+          alert(
+            `Failed to save quiz: ${
+              saveError.message || JSON.stringify(saveError)
+            }`
+          );
+        }
+      } else {
+        console.warn("No user found, skipping Supabase save");
+        alert("Please log in to save your generated quizzes.");
+      }
+
       setShowDialog(true);
     } catch (error) {
       console.error("Error generating quiz:", error);
@@ -381,7 +458,9 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`
 
           {/* Generate Button */}
           <Button
-            onClick={handleGenerateQuiz}
+            onClick={() => {
+              handleGenerateQuiz();
+            }}
             disabled={
               isGenerating ||
               !subject ||
@@ -410,7 +489,7 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`
 
       {/* Generated Quizzes History */}
       {savedQuizzes.length > 0 && (
-        <Card className="glass border-border/50 rounded-2xl">
+        <Card className="glass border-border/50 rounded-2xl w-[98%] mx-auto">
           <CardHeader>
             <CardTitle>Generated Quizzes</CardTitle>
             <CardDescription>
@@ -418,7 +497,7 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {savedQuizzes.map((quiz) => (
+            {savedQuizzes?.map((quiz) => (
               <div
                 key={quiz.id}
                 className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-border/50 hover:border-primary/50 transition-all"

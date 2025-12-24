@@ -127,6 +127,10 @@ export default async function DashboardPage() {
           />
         </div>
 
+        <div className="mb-6 sm:mb-8 lg:mb-10">
+          <AIAssistant />
+        </div>
+
         {/* Main Content Grid - Enhanced Responsiveness */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Subject Progress */}
@@ -148,9 +152,6 @@ export default async function DashboardPage() {
                 <SubjectProgressCard key={subject.name} {...subject} />
               ))}
             </div>
-          </div>
-          <div>
-            <AIAssistant />
           </div>
 
           {/* Study Plan & AI Suggestion */}

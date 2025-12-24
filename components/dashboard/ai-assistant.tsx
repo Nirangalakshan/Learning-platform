@@ -113,13 +113,13 @@ export function AIAssistant() {
                 <label className="text-sm font-medium text-foreground">
                   Topics to study
                 </label>
-                <Textarea
+                <Input
                   placeholder="Enter topics you want to study..."
                   value={input}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setInput(e.target.value)
                   }
-                  className="min-h-20 rounded-lg resize-none"
+                  className="rounded-lg"
                 />
               </div>
               <Button
