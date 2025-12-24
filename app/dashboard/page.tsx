@@ -4,6 +4,7 @@ import { StatsCard } from "@/components/dashboard/stats-card"
 import { SubjectProgressCard } from "@/components/dashboard/subject-progress-card"
 import { StudyPlanCard } from "@/components/dashboard/study-plan-card"
 import { BookOpen, Target, Clock, TrendingUp, ArrowRight, Sparkles } from "lucide-react"
+import { AISidebarWidget } from "@/components/dashboard/ai-sidebar-widget"
 
 const subjects = [
   { name: "Biology", emoji: "🧬", progress: 68, chapters: 24, completedChapters: 16 },
@@ -58,9 +59,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Study Plan */}
+        {/* Sidebar with Study Plan and AI Widget */}
         <div className="space-y-4">
           <StudyPlanCard />
+
+          <AISidebarWidget />
 
           {/* AI Suggestion Card */}
           <Card className="glass border-border/50 rounded-2xl border-primary/30">

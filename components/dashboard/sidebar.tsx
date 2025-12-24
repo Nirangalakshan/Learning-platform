@@ -24,6 +24,7 @@ const navItems = [
   { href: "/dashboard/quizzes", label: "Quizzes", icon: Brain },
   { href: "/dashboard/past-papers", label: "Past Papers", icon: FileText },
   { href: "/dashboard/ai-generator", label: "AI Paper Generator", icon: Sparkles },
+  { href: "/dashboard/ai-assistant", label: "AI Assistant", icon: Sparkles },
   { href: "/dashboard/progress", label: "Progress", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
