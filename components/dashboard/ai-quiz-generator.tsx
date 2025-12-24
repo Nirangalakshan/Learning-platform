@@ -7,8 +7,15 @@ import { Badge } from "@/components/ui/badge"
 import { Loader2, Sparkles, Download, Copy } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 
-const SUBJECTS = ["Biology", "Chemistry", "Physics", "Combined Maths"]
+const SUBJECTS_WITH_TOPICS = {
+  Biology: ["Cell Biology", "Genetics", "Ecology", "Human Physiology"],
+  Chemistry: ["Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry"],
+  Physics: ["Mechanics", "Thermodynamics", "Waves", "Modern Physics"],
+  "Combined Maths": ["Algebra", "Calculus", "Mechanics", "Statistics"],
+}
+
 const QUESTION_TYPES = [
   { value: "multiple-choice", label: "Multiple Choice" },
   { value: "short-answer", label: "Short Answer" },
@@ -23,6 +30,8 @@ const QUESTION_COUNTS = ["5", "10", "15", "20"]
 type GeneratedQuiz = {
   id: string
   subject: string
+  lessons: string[]
+  isAllSyllabus: boolean
   questionType: string
   difficulty: string
   questionCount: number
@@ -38,6 +47,8 @@ type GeneratedQuiz = {
 
 export function AIQuizGenerator() {
   const [subject, setSubject] = useState("")
+  const [selectedLessons, setSelectedLessons] = useState<string[]>([])
+  const [isAllSyllabus, setIsAllSyllabus] = useState(false)
   const [questionType, setQuestionType] = useState("")
   const [difficulty, setDifficulty] = useState("")
   const [questionCount, setQuestionCount] = useState("")
@@ -46,9 +57,27 @@ export function AIQuizGenerator() {
   const [showDialog, setShowDialog] = useState(false)
   const [savedQuizzes, setSavedQuizzes] = useState<GeneratedQuiz[]>([])
 
+  const handleLessonToggle = (lesson: string) => {
+    if (isAllSyllabus) return
+
+    setSelectedLessons((prev) => (prev.includes(lesson) ? prev.filter((l) => l !== lesson) : [...prev, lesson]))
+  }
+
+  const handleAllSyllabusToggle = () => {
+    setIsAllSyllabus(!isAllSyllabus)
+    if (!isAllSyllabus) {
+      setSelectedLessons([])
+    }
+  }
+
   const handleGenerateQuiz = async () => {
     if (!subject || !questionType || !difficulty || !questionCount) {
       alert("Please select all options")
+      return
+    }
+
+    if (!isAllSyllabus && selectedLessons.length === 0) {
+      alert("Please select lessons or choose 'All Syllabus'")
       return
     }
 
@@ -59,6 +88,8 @@ export function AIQuizGenerator() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           subject,
+          lessons: isAllSyllabus ? [] : selectedLessons,
+          isAllSyllabus,
           questionType,
           difficulty,
           questionCount: Number.parseInt(questionCount),
@@ -71,6 +102,8 @@ export function AIQuizGenerator() {
       const newQuiz: GeneratedQuiz = {
         id: Date.now().toString(),
         subject,
+        lessons: isAllSyllabus ? [] : selectedLessons,
+        isAllSyllabus,
         questionType,
         difficulty,
         questionCount: Number.parseInt(questionCount),
@@ -100,6 +133,7 @@ export function AIQuizGenerator() {
     if (!generatedQuiz) return
     const quizContent = `${generatedQuiz.subject} - ${generatedQuiz.questionType} Quiz
 Difficulty: ${generatedQuiz.difficulty}
+Scope: ${generatedQuiz.isAllSyllabus ? "All Syllabus" : generatedQuiz.lessons.join(", ")}
 Generated: ${generatedQuiz.generatedAt}
 ---
 
@@ -122,6 +156,8 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
     document.body.removeChild(a)
   }
 
+  const availableLessons = subject ? SUBJECTS_WITH_TOPICS[subject as keyof typeof SUBJECTS_WITH_TOPICS] : []
+
   return (
     <div className="space-y-6">
       {/* Generator Card */}
@@ -131,19 +167,28 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
             <Sparkles className="w-5 h-5 text-primary" />
             AI Quiz Generator
           </CardTitle>
-          <CardDescription>Create customized quizzes using AI based on subject and question type</CardDescription>
+          <CardDescription>
+            Create customized quizzes using AI based on subject, lessons, and question type
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Subject Selection */}
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">Subject</label>
-              <Select value={subject} onValueChange={setSubject}>
+              <Select
+                value={subject}
+                onValueChange={(value) => {
+                  setSubject(value)
+                  setSelectedLessons([])
+                  setIsAllSyllabus(false)
+                }}
+              >
                 <SelectTrigger className="bg-background border-border/50">
                   <SelectValue placeholder="Select subject..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {SUBJECTS.map((subj) => (
+                  {Object.keys(SUBJECTS_WITH_TOPICS).map((subj) => (
                     <SelectItem key={subj} value={subj}>
                       {subj}
                     </SelectItem>
@@ -204,10 +249,55 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
             </div>
           </div>
 
+          {subject && (
+            <div className="space-y-3 p-4 bg-background/50 rounded-lg border border-border/50">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground">Select Lessons</label>
+                <div className="flex items-center gap-2">
+                  <Checkbox id="all-syllabus" checked={isAllSyllabus} onCheckedChange={handleAllSyllabusToggle} />
+                  <label htmlFor="all-syllabus" className="text-sm font-medium cursor-pointer">
+                    All Syllabus
+                  </label>
+                </div>
+              </div>
+
+              {!isAllSyllabus && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {availableLessons.map((lesson) => (
+                    <div key={lesson} className="flex items-center gap-2">
+                      <Checkbox
+                        id={lesson}
+                        checked={selectedLessons.includes(lesson)}
+                        onCheckedChange={() => handleLessonToggle(lesson)}
+                      />
+                      <label
+                        htmlFor={lesson}
+                        className="text-sm cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {lesson}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {isAllSyllabus && (
+                <p className="text-xs text-muted-foreground italic">Quiz will cover all lessons from {subject}</p>
+              )}
+            </div>
+          )}
+
           {/* Generate Button */}
           <Button
             onClick={handleGenerateQuiz}
-            disabled={isGenerating || !subject || !questionType || !difficulty || !questionCount}
+            disabled={
+              isGenerating ||
+              !subject ||
+              !questionType ||
+              !difficulty ||
+              !questionCount ||
+              (!isAllSyllabus && selectedLessons.length === 0)
+            }
             className="w-full"
           >
             {isGenerating ? (
@@ -243,10 +333,20 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
                   <p className="text-xs text-muted-foreground">
                     {quiz.questionCount} {quiz.questionType} questions • {quiz.difficulty}
                   </p>
+                  <p className="text-xs text-primary/80 mt-1">
+                    {quiz.isAllSyllabus ? "All Syllabus" : quiz.lessons.join(", ")}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">{quiz.generatedAt}</Badge>
-                  <Button variant="ghost" size="sm" onClick={() => setGeneratedQuiz(quiz)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setGeneratedQuiz(quiz)
+                      setShowDialog(true)
+                    }}
+                  >
                     View
                   </Button>
                 </div>
@@ -263,6 +363,11 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`,
             <DialogTitle>{generatedQuiz?.subject} Quiz</DialogTitle>
             <DialogDescription>
               {generatedQuiz?.questionCount} {generatedQuiz?.questionType} questions • {generatedQuiz?.difficulty} level
+              {generatedQuiz && (
+                <div className="mt-2 text-xs text-muted-foreground">
+                  {generatedQuiz.isAllSyllabus ? "All Syllabus" : generatedQuiz.lessons.join(", ")}
+                </div>
+              )}
             </DialogDescription>
           </DialogHeader>
 

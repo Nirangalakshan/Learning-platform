@@ -5,13 +5,19 @@ const API_URL = process.env.APILAGE_API_URL
 
 export async function POST(request: NextRequest) {
   try {
-    const { subject, questionType, difficulty, questionCount } = await request.json()
+    const { subject, lessons, isAllSyllabus, questionType, difficulty, questionCount } = await request.json()
 
     if (!subject || !questionType || !difficulty || !questionCount) {
       return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
     }
 
+    const scopeSection = isAllSyllabus
+      ? `Cover all topics and lessons from the ${subject} syllabus`
+      : `Focus on these specific lessons/topics: ${lessons.join(", ")}`
+
     const prompt = `Generate ${questionCount} ${difficulty.toLowerCase()} level ${questionType.replace("-", " ")} questions for ${subject} subject (Sri Lankan A/L Science).
+
+Scope: ${scopeSection}
 
 For ${questionType}:
 ${
@@ -84,6 +90,8 @@ Return the response as JSON with this structure:
       subject,
       questionType,
       difficulty,
+      lessons,
+      isAllSyllabus,
     })
   } catch (error) {
     console.error("[v0] Quiz generation error:", error)
