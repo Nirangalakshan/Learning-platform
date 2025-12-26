@@ -21,12 +21,22 @@ import { ModeToggle } from "@/components/mode-toggle";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/subjects", label: "Subjects", icon: BookOpen },
+  {
+    href: "/dashboard/subjects",
+    label: "Subjects (Coming Soon)",
+    icon: BookOpen,
+    disabled: true,
+  },
   { href: "/dashboard/quizzes", label: "Quizzes", icon: Brain },
   { href: "/dashboard/past-papers", label: "Past Papers", icon: FileText },
+  // {
+  //   href: "/dashboard/ai-generator",
+  //   label: "AI Paper Generator",
+  //   icon: Sparkles,
+  // },
   {
-    href: "/dashboard/ai-generator",
-    label: "AI Paper Generator",
+    href: "/dashboard/assistant",
+    label: "AI Assistant",
     icon: Sparkles,
   },
   { href: "/dashboard/progress", label: "Progress", icon: BarChart3 },
@@ -92,6 +102,25 @@ export function DashboardSidebar() {
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
+
+            // @ts-ignore
+            if (item.disabled) {
+              return (
+                <div
+                  title="Coming Soon"
+                  key={`${item.href}-disabled`}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-muted-foreground/50 cursor-not-allowed"
+                  )}
+                >
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                  {!collapsed && (
+                    <span className="text-sm font-medium">{item.label}</span>
+                  )}
+                </div>
+              );
+            }
+
             return (
               <Link
                 key={item.href}
