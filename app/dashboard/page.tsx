@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AIAssistant } from "@/components/dashboard/ai-assistant";
+import { ActivityGraph } from "@/components/dashboard/activity-graph";
 
 const subjects = [
   {
@@ -62,6 +63,12 @@ export default async function DashboardPage() {
     .select("*")
     .eq("id", user.id)
     .single();
+
+  const { data: sessions } = await supabase
+    .from("user_sessions")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("session_start", { ascending: false });
 
   return (
     <div className="relative min-h-screen">
@@ -114,9 +121,9 @@ export default async function DashboardPage() {
           />
           <StatsCard
             title="Study Time"
-            value="24h"
+            value="Today"
             icon={Clock}
-            trend="This month"
+            trend="Auto-tracking..."
           />
           <StatsCard
             title="Current Streak"
@@ -129,6 +136,11 @@ export default async function DashboardPage() {
 
         <div className="mb-6 sm:mb-8 lg:mb-10">
           <AIAssistant />
+        </div>
+
+        {/* Activity Graph Section */}
+        <div className="mb-6 sm:mb-8 lg:mb-10">
+          <ActivityGraph sessions={sessions || []} />
         </div>
 
         {/* Main Content Grid - Enhanced Responsiveness */}

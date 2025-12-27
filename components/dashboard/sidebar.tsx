@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/contexts/sidebar-context";
 import { ModeToggle } from "@/components/mode-toggle";
+import { createClient } from "@/lib/supabase/client";
+import { endSession } from "@/lib/session-manager";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -157,7 +159,15 @@ export function DashboardSidebar() {
             )}
             <ModeToggle />
           </div>
-          <Link href="/">
+          <button
+            onClick={async () => {
+              const supabase = createClient();
+              await endSession(supabase);
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}
+            className="w-full"
+          >
             <Button
               variant="ghost"
               className={cn(
@@ -168,7 +178,7 @@ export function DashboardSidebar() {
               <LogOut className="w-5 h-5" />
               {!collapsed && <span>Logout</span>}
             </Button>
-          </Link>
+          </button>
         </div>
       </aside>
     </>
