@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+import { startSession } from "@/lib/session-manager";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -65,6 +66,11 @@ export default function LoginPage() {
         setError("Please verify your email before logging in.");
         setLoading(false);
         return;
+      }
+
+      // Start Session Tracking
+      if (data.user) {
+        await startSession(supabase, data.user.id);
       }
 
       // Redirect to dashboard
