@@ -13,6 +13,7 @@ import {
   LogOut,
   ChevronLeft,
   Menu,
+  FlaskConical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,11 @@ const navItems = [
     disabled: true,
   },
   { href: "/dashboard/quizzes", label: "Quizzes", icon: Brain },
+  {
+    href: "/dashboard/lab-practicals",
+    label: "Lab Practicals",
+    icon: FlaskConical,
+  },
   { href: "/dashboard/past-papers", label: "Past Papers", icon: FileText },
   // {
   //   href: "/dashboard/ai-generator",

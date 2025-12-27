@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatsCard } from "@/components/dashboard/stats-card";
@@ -12,6 +13,9 @@ import {
   TrendingUp,
   ArrowRight,
   Sparkles,
+  FileText,
+  Calendar,
+  ListChecks,
 } from "lucide-react";
 import { AIAssistant } from "@/components/dashboard/ai-assistant";
 import { ActivityGraph } from "@/components/dashboard/activity-graph";
@@ -64,11 +68,62 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
+  if (profile && !profile.onboarding_completed) {
+    return redirect("/onboarding");
+  }
+
   const { data: sessions } = await supabase
     .from("user_sessions")
     .select("*")
     .eq("user_id", user.id)
     .order("session_start", { ascending: false });
+
+  // Fetch quizzes count and data
+  const { count: quizCount, data: recentQuizzes } = await supabase
+    .from("ai_quizzes")
+    .select("*", { count: "exact" })
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  // Fetch study plans count and data
+  const { count: planCount, data: recentPlans } = await supabase
+    .from("user_study_plans")
+    .select("*", { count: "exact" })
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  // Fetch short notes count and data
+  const { count: notesCount, data: recentNotes } = await supabase
+    .from("user_short_notes")
+    .select("*", { count: "exact" })
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  // Calculate today's study time
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todaySessions =
+    sessions?.filter((s) => new Date(s.session_start) >= today) || [];
+  const totalMinutes = todaySessions.reduce((acc, s) => {
+    if (s.session_end) {
+      const start = new Date(s.session_start).getTime();
+      const end = new Date(s.session_end).getTime();
+      return acc + (end - start) / (1000 * 60);
+    }
+    return acc;
+  }, 0);
+
+  const formatTime = (minutes: number) => {
+    if (minutes < 1) return "0m";
+    if (minutes < 60) return `${Math.round(minutes)}m`;
+    const h = Math.floor(minutes / 60);
+    const m = Math.round(minutes % 60);
+    return `${h}h ${m}m`;
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -106,30 +161,30 @@ export default async function DashboardPage() {
         {/* Stats Grid - Enhanced Responsiveness */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 mb-6 sm:mb-8 lg:mb-10">
           <StatsCard
-            title="Chapters Completed"
-            value={42}
-            icon={BookOpen}
-            trend="8 this week"
+            title="Generated Quizzes"
+            value={quizCount || 0}
+            icon={ListChecks}
+            trend="Total created"
             trendUp={true}
           />
           <StatsCard
-            title="Quiz Accuracy"
-            value="78%"
-            icon={Target}
-            trend="+5% from last week"
+            title="Study Plans"
+            value={planCount || 0}
+            icon={Calendar}
+            trend="Total generated"
             trendUp={true}
           />
           <StatsCard
             title="Study Time"
-            value="Today"
+            value={formatTime(totalMinutes)}
             icon={Clock}
-            trend="Auto-tracking..."
+            trend="Today"
           />
           <StatsCard
-            title="Current Streak"
-            value="7 days"
-            icon={TrendingUp}
-            trend="Personal best!"
+            title="Short Notes"
+            value={notesCount || 0}
+            icon={FileText}
+            trend="Total sets"
             trendUp={true}
           />
         </div>
@@ -144,54 +199,146 @@ export default async function DashboardPage() {
         </div>
 
         {/* Main Content Grid - Enhanced Responsiveness */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Subject Progress */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          {/* Recent Quizzes */}
+          <div className="space-y-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg sm:text-xl font-semibold text-foreground">
-                Subject Progress
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground flex items-center gap-2">
+                <ListChecks className="w-5 h-5 text-primary" />
+                Recent Quizzes
               </h2>
               <Button
                 variant="ghost"
                 size="sm"
                 className="text-primary hover:text-primary/80 transition-colors"
+                asChild
               >
-                View All
+                <Link href="/dashboard/quizzes">View All</Link>
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 lg:gap-5">
-              {subjects.map((subject) => (
-                <SubjectProgressCard key={subject.name} {...subject} />
-              ))}
+            <div className="space-y-3">
+              {recentQuizzes?.length ? (
+                recentQuizzes.map((quiz) => (
+                  <Card
+                    key={quiz.id}
+                    className="glass border-border/50 hover:border-primary/50 transition-all p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-foreground">
+                          {quiz.subject}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {quiz.question_count} questions • {quiz.difficulty} •{" "}
+                          {new Date(quiz.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href="/dashboard/quizzes">View</Link>
+                      </Button>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center p-8 border border-dashed rounded-xl border-border/50 text-muted-foreground">
+                  No quizzes generated yet.
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Study Plan & AI Suggestion */}
-          <div className="space-y-4 sm:space-y-5">
-            <StudyPlanCard />
+          {/* Recent Study Plans */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-primary" />
+                Recent Study Plans
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary hover:text-primary/80 transition-colors"
+                asChild
+              >
+                <Link href="/dashboard/assistant">View All</Link>
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {recentPlans?.length ? (
+                recentPlans.map((plan) => (
+                  <Card
+                    key={plan.id}
+                    className="glass border-border/50 hover:border-primary/50 transition-all p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium text-foreground">
+                          {plan.subject}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {plan.total_weeks} weeks •{" "}
+                          {new Date(plan.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href="/dashboard/assistant">View</Link>
+                      </Button>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center p-8 border border-dashed rounded-xl border-border/50 text-muted-foreground">
+                  No study plans generated yet.
+                </div>
+              )}
+            </div>
+          </div>
 
-            {/* AI Suggestion Card - Enhanced */}
-            <Card className="glass border-border/50 rounded-2xl lg:rounded-3xl border-primary/30 hover:border-primary/50 transition-all duration-300">
-              <CardHeader className="pb-3 sm:pb-4">
-                <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-                  AI Suggestion
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 leading-relaxed">
-                  Based on your progress, focus on Chemistry Chapter 12: Organic
-                  Reactions for better exam preparation.
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full bg-transparent hover:bg-primary/10 hover:border-primary/50 transition-all duration-300"
-                >
-                  Start Lesson
-                </Button>
-              </CardContent>
-            </Card>
+          {/* Recent Short Notes - Spanning full width below */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-foreground flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                Recent Short Notes
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-primary hover:text-primary/80 transition-colors"
+                asChild
+              >
+                <Link href="/dashboard/assistant">View All</Link>
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {recentNotes?.length ? (
+                recentNotes.slice(0, 4).map((note) => (
+                  <Card
+                    key={note.id}
+                    className="glass border-border/50 hover:border-primary/50 transition-all p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="min-w-0 flex-1 mr-4">
+                        <h3 className="font-medium text-foreground truncate">
+                          {note.topic}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {note.subject} •{" "}
+                          {new Date(note.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href="/dashboard/assistant">View</Link>
+                      </Button>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                <div className="md:col-span-2 text-center p-8 border border-dashed rounded-xl border-border/50 text-muted-foreground">
+                  No short notes generated yet.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
