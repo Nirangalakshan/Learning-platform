@@ -379,8 +379,11 @@ export function AIStudyPlan() {
           </h2>
           <div className="grid gap-4">
             {Array.isArray(studyPlan) &&
-              studyPlan.map((week) => (
-                <Card key={week.week} className="glass border-secondary/30">
+              studyPlan.map((week, weekIndex) => (
+                <Card
+                  key={`week-${weekIndex}-${week.week}`}
+                  className="glass border-secondary/30"
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">

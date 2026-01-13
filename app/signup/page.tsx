@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,14 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
+
+interface SignupParticle {
+  id: number;
+  left: number;
+  top: number;
+  duration: number;
+  delay: number;
+}
 
 const subjects = [
   { id: "biology", name: "Biology", emoji: "🧬" },
@@ -72,6 +80,20 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [signupParticles, setSignupParticles] = useState<SignupParticle[]>([]);
+
+  useEffect(() => {
+    // Generate random particles on client side only to prevent hydration mismatch
+    setSignupParticles(
+      Array.from({ length: 12 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        duration: Math.random() * 6 + 4,
+        delay: Math.random() * 3,
+      }))
+    );
+  }, []);
 
   // Form States
   const [formData, setFormData] = useState({
@@ -243,22 +265,22 @@ export default function SignupPage() {
         />
 
         {/* Particles */}
-        {Array.from({ length: 12 }).map((_, i) => (
+        {signupParticles.map((particle) => (
           <motion.div
-            key={i}
+            key={particle.id}
             className="absolute w-1 h-1 rounded-full bg-primary/40"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
             }}
             animate={{
               y: [0, -150, -300],
               opacity: [0, 0.8, 0],
             }}
             transition={{
-              duration: Math.random() * 6 + 4,
+              duration: particle.duration,
               repeat: Infinity,
-              delay: Math.random() * 3,
+              delay: particle.delay,
             }}
           />
         ))}

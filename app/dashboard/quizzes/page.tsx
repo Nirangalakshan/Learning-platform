@@ -545,14 +545,14 @@ ${q.options ? q.options.map((opt) => `  - ${opt}`).join("\n") : ""}`
               {generatedQuiz?.questionCount} {generatedQuiz?.questionType}{" "}
               questions • {generatedQuiz?.difficulty} level
               {generatedQuiz && (
-                <div className="mt-2 text-xs text-muted-foreground">
+                <span className="block mt-2 text-xs text-muted-foreground">
                   {generatedQuiz.language.charAt(0).toUpperCase() +
                     generatedQuiz.language.slice(1)}{" "}
                   •{" "}
                   {generatedQuiz.isAllSyllabus
                     ? "All Syllabus"
                     : generatedQuiz.lessons.join(", ")}
-                </div>
+                </span>
               )}
             </DialogDescription>
           </DialogHeader>

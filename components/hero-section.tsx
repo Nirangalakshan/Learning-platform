@@ -5,7 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Search, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+
+interface HeroParticle {
+  id: number;
+  left: number;
+  top: number;
+  duration: number;
+  delay: number;
+}
 
 function AnimatedWords({ words }: { words: string[] }) {
   const [index, setIndex] = useState(0);
@@ -72,6 +80,21 @@ const statsVariants = {
 };
 
 export function HeroSection() {
+  const [heroParticles, setHeroParticles] = useState<HeroParticle[]>([]);
+
+  useEffect(() => {
+    // Generate random particles on client side only to prevent hydration mismatch
+    setHeroParticles(
+      Array.from({ length: 15 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        duration: Math.random() * 5 + 3,
+        delay: Math.random() * 3,
+      }))
+    );
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       {/* Background Effects */}
@@ -115,13 +138,13 @@ export function HeroSection() {
         />
 
         {/* Floating particles specific to hero */}
-        {Array.from({ length: 15 }).map((_, i) => (
+        {heroParticles.map((particle) => (
           <motion.div
-            key={i}
+            key={particle.id}
             className="absolute w-1 h-1 rounded-full bg-primary/40"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
             }}
             animate={{
               y: [0, -100, -200],
@@ -129,9 +152,9 @@ export function HeroSection() {
               scale: [0, 1, 0],
             }}
             transition={{
-              duration: Math.random() * 5 + 3,
+              duration: particle.duration,
               repeat: Infinity,
-              delay: Math.random() * 3,
+              delay: particle.delay,
               ease: "easeOut",
             }}
           />

@@ -1,17 +1,55 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+interface Particle {
+  id: number;
+  size: number;
+  initialX: number;
+  initialY: number;
+  duration: number;
+  delay: number;
+  xOffset: number;
+}
+
+interface Dot {
+  id: number;
+  left: number;
+  top: number;
+  duration: number;
+  delay: number;
+}
+
 export function AnimatedBackground() {
-  // Generate random particles
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    size: Math.random() * 4 + 2,
-    initialX: Math.random() * 100,
-    initialY: Math.random() * 100,
-    duration: Math.random() * 20 + 15,
-    delay: Math.random() * 5,
-  }));
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [dots, setDots] = useState<Dot[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Generate random values only on the client side to avoid hydration mismatch
+    setParticles(
+      Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        size: Math.random() * 4 + 2,
+        initialX: Math.random() * 100,
+        initialY: Math.random() * 100,
+        duration: Math.random() * 20 + 15,
+        delay: Math.random() * 5,
+        xOffset: Math.random() * 50 - 25,
+      }))
+    );
+    setDots(
+      Array.from({ length: 50 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        duration: Math.random() * 3 + 2,
+        delay: Math.random() * 2,
+      }))
+    );
+    setMounted(true);
+  }, []);
 
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
@@ -102,7 +140,7 @@ export function AnimatedBackground() {
           }}
           animate={{
             y: [0, -100, 0],
-            x: [0, Math.random() * 50 - 25, 0],
+            x: [0, particle.xOffset, 0],
             opacity: [0, 1, 0],
           }}
           transition={{
@@ -115,27 +153,29 @@ export function AnimatedBackground() {
       ))}
 
       {/* Floating Dots Pattern */}
-      <div className="absolute inset-0 opacity-[0.02]">
-        {Array.from({ length: 50 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 rounded-full bg-primary"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 0.8, 0.3],
-            }}
-            transition={{
-              duration: Math.random() * 3 + 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-      </div>
+      {mounted && (
+        <div className="absolute inset-0 opacity-[0.02]">
+          {dots.map((dot) => (
+            <motion.div
+              key={dot.id}
+              className="absolute w-1 h-1 rounded-full bg-primary"
+              style={{
+                left: `${dot.left}%`,
+                top: `${dot.top}%`,
+              }}
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.3, 0.8, 0.3],
+              }}
+              transition={{
+                duration: dot.duration,
+                repeat: Infinity,
+                delay: dot.delay,
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Scan Line Effect */}
       <motion.div

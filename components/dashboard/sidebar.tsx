@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   Menu,
   FlaskConical,
+  Bot,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,12 +26,12 @@ import { endSession } from "@/lib/session-manager";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  {
-    href: "/dashboard/subjects",
-    label: "Subjects (Coming Soon)",
-    icon: BookOpen,
-    disabled: true,
-  },
+  // {
+  //   href: "/dashboard/subjects",
+  //   label: "Subjects (Coming Soon)",
+  //   icon: BookOpen,
+  //   disabled: true,
+  // },
   { href: "/dashboard/quizzes", label: "Quizzes", icon: Brain },
   {
     href: "/dashboard/lab-practicals",
@@ -37,17 +39,16 @@ const navItems = [
     icon: FlaskConical,
   },
   { href: "/dashboard/past-papers", label: "Past Papers", icon: FileText },
-  // {
-  //   href: "/dashboard/ai-generator",
-  //   label: "AI Paper Generator",
-  //   icon: Sparkles,
-  // },
+  {
+    href: "/dashboard/ask-ai",
+    label: "Ask AI",
+    icon: Bot,
+  },
   {
     href: "/dashboard/assistant",
     label: "AI Assistant",
     icon: Sparkles,
   },
-  { href: "/dashboard/progress", label: "Progress", icon: BarChart3 },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -165,26 +166,22 @@ export function DashboardSidebar() {
             )}
             <ModeToggle />
           </div>
-          <button
+          <Button
+            variant="ghost"
             onClick={async () => {
               const supabase = createClient();
               await endSession(supabase);
               await supabase.auth.signOut();
               window.location.href = "/";
             }}
-            className="w-full"
+            className={cn(
+              "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
+              collapsed && "justify-center px-0"
+            )}
           >
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
-                collapsed && "justify-center px-0"
-              )}
-            >
-              <LogOut className="w-5 h-5" />
-              {!collapsed && <span>Logout</span>}
-            </Button>
-          </button>
+            <LogOut className="w-5 h-5" />
+            {!collapsed && <span>Logout</span>}
+          </Button>
         </div>
       </aside>
     </>

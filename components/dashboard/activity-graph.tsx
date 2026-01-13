@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import {
   Card,
@@ -39,8 +39,20 @@ interface ActivityGraphProps {
 }
 
 export function ActivityGraph({ sessions }: ActivityGraphProps) {
-  const { theme } = useTheme();
-  const tickColor = theme === "dark" ? "#ffffff" : "#000000";
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Only access theme on client side to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Use a consistent default for SSR, then client value after mount
+  const tickColor = mounted
+    ? resolvedTheme === "dark"
+      ? "#ffffff"
+      : "#000000"
+    : "#888888"; // Neutral color for SSR
 
   const stats = useMemo(() => {
     const today = new Date();

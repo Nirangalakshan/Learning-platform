@@ -12,11 +12,15 @@ export function StudyTrackerCard() {
   const [isActive, setIsActive] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const startTimeRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
+    // Mark as mounted first to prevent hydration mismatch
+    setMounted(true);
+
     // Check for active session in localStorage on mount
     const storedStartTime = localStorage.getItem("study_session_start");
     if (storedStartTime) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,14 @@ import { Eye, EyeOff, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { startSession } from "@/lib/session-manager";
+
+interface LoginParticle {
+  id: number;
+  left: number;
+  top: number;
+  duration: number;
+  delay: number;
+}
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -43,6 +51,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loginParticles, setLoginParticles] = useState<LoginParticle[]>([]);
+
+  useEffect(() => {
+    // Generate random particles on client side only to prevent hydration mismatch
+    setLoginParticles(
+      Array.from({ length: 10 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 50,
+        top: Math.random() * 100,
+        duration: Math.random() * 5 + 3,
+        delay: Math.random() * 3,
+      }))
+    );
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,22 +164,22 @@ export default function LoginPage() {
         />
 
         {/* Particles */}
-        {Array.from({ length: 10 }).map((_, i) => (
+        {loginParticles.map((particle) => (
           <motion.div
-            key={i}
+            key={particle.id}
             className="absolute w-1 h-1 rounded-full bg-primary/40"
             style={{
-              left: `${Math.random() * 50}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
             }}
             animate={{
               y: [0, -100, -200],
               opacity: [0, 0.8, 0],
             }}
             transition={{
-              duration: Math.random() * 5 + 3,
+              duration: particle.duration,
               repeat: Infinity,
-              delay: Math.random() * 3,
+              delay: particle.delay,
             }}
           />
         ))}
