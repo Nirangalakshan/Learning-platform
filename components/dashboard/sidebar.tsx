@@ -16,6 +16,7 @@ import {
   FlaskConical,
   Bot,
   MessageSquare,
+  PenTool,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -49,6 +50,11 @@ const navItems = [
     label: "AI Assistant",
     icon: Sparkles,
   },
+  {
+    href: "/dashboard/live-learning",
+    label: "Live Learning",
+    icon: PenTool,
+  },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
@@ -79,7 +85,7 @@ export function DashboardSidebar() {
         className={cn(
           "fixed left-0 top-0 h-full z-40 flex flex-col glass border-r border-border/50 transition-all duration-300",
           collapsed ? "w-20" : "w-64",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
         {/* Logo */}
@@ -101,7 +107,7 @@ export function DashboardSidebar() {
             <ChevronLeft
               className={cn(
                 "w-5 h-5 transition-transform",
-                collapsed && "rotate-180"
+                collapsed && "rotate-180",
               )}
             />
           </button>
@@ -119,7 +125,7 @@ export function DashboardSidebar() {
                   title="Coming Soon"
                   key={`${item.href}-disabled`}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-muted-foreground/50 cursor-not-allowed"
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-muted-foreground/50 cursor-not-allowed",
                   )}
                 >
                   <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -138,7 +144,7 @@ export function DashboardSidebar() {
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all",
                   isActive
                     ? "bg-primary/10 text-[#009966] dark:text-[#00FF99]"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
                 onClick={() => setMobileOpen(false)}
               >
@@ -156,7 +162,7 @@ export function DashboardSidebar() {
           <div
             className={cn(
               "flex items-center",
-              collapsed ? "justify-center" : "justify-between px-2"
+              collapsed ? "justify-center" : "justify-between px-2",
             )}
           >
             {!collapsed && (
@@ -176,7 +182,7 @@ export function DashboardSidebar() {
             }}
             className={cn(
               "w-full justify-start gap-3 text-muted-foreground hover:text-foreground",
-              collapsed && "justify-center px-0"
+              collapsed && "justify-center px-0",
             )}
           >
             <LogOut className="w-5 h-5" />
